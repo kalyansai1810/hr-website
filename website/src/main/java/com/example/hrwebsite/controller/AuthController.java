@@ -5,6 +5,7 @@ import com.example.hrwebsite.dto.LoginRequest;
 import com.example.hrwebsite.dto.UserRegistrationRequest;
 import com.example.hrwebsite.model.User;
 import com.example.hrwebsite.service.AuthService;
+import com.example.hrwebsite.service.UserService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,9 @@ public class AuthController {
     
     @Autowired
     private AuthService authService;
+    
+    @Autowired
+    private UserService userService;
     
     /**
      * User login endpoint
@@ -57,6 +61,17 @@ public class AuthController {
         user.setEmail(registrationRequest.getEmail());
         user.setPassword(registrationRequest.getPassword());
         user.setRole(registrationRequest.getRole());
+        user.setEmployeeId(registrationRequest.getEmployeeId());
+        user.setDepartment(registrationRequest.getDepartment());
+        user.setJobTitle(registrationRequest.getJobTitle());
+        user.setActive(registrationRequest.getActive());
+        
+        // Set manager if provided
+        if (registrationRequest.getManagerId() != null) {
+            User manager = userService.findById(registrationRequest.getManagerId())
+                .orElseThrow(() -> new RuntimeException("Manager not found with ID: " + registrationRequest.getManagerId()));
+            user.setManager(manager);
+        }
         
         Map<String, Object> response = authService.register(user);
         

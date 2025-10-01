@@ -4,10 +4,12 @@ import com.example.hrwebsite.validation.ValidRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 
 /**
  * DTO for user registration requests
  */
+@Data
 public class UserRegistrationRequest {
     
     @NotBlank(message = "Name is required")
@@ -26,55 +28,16 @@ public class UserRegistrationRequest {
     @ValidRole
     private String role;
     
-    // Constructors
-    public UserRegistrationRequest() {}
+    @Size(max = 20, message = "Employee ID must not exceed 20 characters")
+    private String employeeId;
     
-    public UserRegistrationRequest(String name, String email, String password, String role) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.role = role;
-    }
+    @Size(max = 100, message = "Department must not exceed 100 characters")
+    private String department;
     
-    // Getters and Setters
-    public String getName() {
-        return name;
-    }
+    @Size(max = 100, message = "Job title must not exceed 100 characters")
+    private String jobTitle;
     
-    public void setName(String name) {
-        this.name = name;
-    }
+    private Long managerId; // For employees - who is their manager
     
-    public String getEmail() {
-        return email;
-    }
-    
-    public void setEmail(String email) {
-        this.email = email;
-    }
-    
-    public String getPassword() {
-        return password;
-    }
-    
-    public void setPassword(String password) {
-        this.password = password;
-    }
-    
-    public String getRole() {
-        return role;
-    }
-    
-    public void setRole(String role) {
-        this.role = role;
-    }
-    
-    @Override
-    public String toString() {
-        return "UserRegistrationRequest{" +
-                "name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", role='" + role + '\'' +
-                '}';
-    }
+    private Boolean active = true;
 }

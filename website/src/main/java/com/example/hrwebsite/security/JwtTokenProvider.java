@@ -63,7 +63,9 @@ public class JwtTokenProvider {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        return claims.get("roles", List.class);
+        @SuppressWarnings("unchecked")
+        List<String> roles = (List<String>) claims.get("roles", List.class);
+        return roles;
     }
 
     public boolean validateToken(String authToken) {

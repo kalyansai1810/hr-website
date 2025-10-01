@@ -1,6 +1,6 @@
 # HR Website - Enterprise Spring Boot Application
 
-A comprehensive Human Resources management system built with Spring Boot, featuring JWT authentication, role-based access control, and enterprise-level architecture patterns.
+A comprehensive Human Resources management system built with Spring Boot, featuring JWT authentication, 4-role access control, and complete timesheet workflow automation.
 
 ## 🏗️ Project Architecture
 
@@ -14,13 +14,13 @@ A comprehensive Human Resources management system built with Spring Boot, featur
 
 ### Enterprise Architecture Components
 ```
-├── Controllers (API Layer)
+├── Controllers (API Layer - Role-based Endpoints)
 ├── DTOs (Data Transfer Objects)
 ├── Services (Business Logic Layer)
-├── Repositories (Data Access Layer)
-├── Models (JPA Entities)
-├── Security (JWT + Spring Security)
-├── Validation (Custom Validators)
+├── Repositories (Data Access Layer with JOIN FETCH)
+├── Models (JPA Entities with Lazy Loading)
+├── Security (JWT + Role-based Authorization)
+├── Validation (Enterprise Validators)
 ├── Exception Handling (Global Error Handling)
 └── Configuration (Application Settings)
 ```
@@ -46,7 +46,7 @@ GRANT ALL PRIVILEGES ON DATABASE hrdb TO hruser;
 cd D:\website
 
 # Build the application
-java -cp ".mvn\wrapper\maven-wrapper.jar" "-Dmaven.multiModuleProjectDirectory=D:\website" org.apache.maven.wrapper.MavenWrapperMain clean package -DskipTests
+.\mvnw.cmd clean package -DskipTests
 
 # Run the application
 java -jar target/hr-website-0.0.1-SNAPSHOT.jar
@@ -57,31 +57,69 @@ java -jar target/hr-website-0.0.1-SNAPSHOT.jar
 - **Health Check**: http://localhost:8081/actuator/health
 - **Metrics**: http://localhost:8081/actuator/metrics
 
+## 🎯 Complete HR Workflow System
+
+### 4-Role Access Control
+- **ADMIN**: Complete system administration
+- **HR**: Project allocation and employee management
+- **MANAGER**: Timesheet approval and team management
+- **EMPLOYEE**: Timesheet submission for assigned projects
+
+### Workflow Process
+1. **HR** creates projects and assigns employees to them
+2. **EMPLOYEE** submits timesheets for assigned projects
+3. **MANAGER** approves or rejects submitted timesheets
+4. **ADMIN** oversees complete system operations
+
 ## 📋 API Documentation
 
 ### Authentication Endpoints
 
-#### Register User
+#### Admin Registration
+```bash
+curl -X POST http://localhost:8081/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "System Admin",
+    "email": "admin@example.com",
+    "password": "password123",
+    "role": "ADMIN"
+  }'
+```
+
+#### HR Registration
+```bash
+curl -X POST http://localhost:8081/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "HR Manager",
+    "email": "hr@example.com",
+    "password": "password123",
+    "role": "HR"
+  }'
+```
+
+#### Manager Registration
+```bash
+curl -X POST http://localhost:8081/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Team Manager",
+    "email": "manager@example.com",
+    "password": "password123",
+    "role": "MANAGER"
+  }'
+```
+
+#### Employee Registration
 ```bash
 curl -X POST http://localhost:8081/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "name": "John Employee",
-    "email": "employee@company.com",
+    "email": "employee@example.com",
     "password": "password123",
     "role": "EMPLOYEE"
-  }'
-```
-
-#### Register Manager
-```bash
-curl -X POST http://localhost:8081/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Jane Manager",
-    "email": "manager@company.com",
-    "password": "password123",
-    "role": "MANAGER"
   }'
 ```
 
@@ -90,7 +128,7 @@ curl -X POST http://localhost:8081/api/auth/register \
 curl -X POST http://localhost:8081/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "employee@company.com",
+    "email": "employee@example.com",
     "password": "password123"
   }'
 ```
@@ -105,82 +143,122 @@ curl -X POST http://localhost:8081/api/auth/login \
     "user": {
       "id": 1,
       "name": "John Employee",
-      "email": "employee@company.com",
+      "email": "employee@example.com",
       "role": "EMPLOYEE"
     }
   }
 }
 ```
 
-### Employee Timesheet Endpoints
+### Admin Endpoints (ADMIN Role Required)
 
-#### Submit Timesheet
+#### Create User
 ```bash
-curl -X POST http://localhost:8081/api/timesheets \
+curl -X POST http://localhost:8081/api/admin/users \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Authorization: Bearer ADMIN_JWT_TOKEN" \
   -d '{
-    "date": "2025-10-01",
-    "hours": 8,
-    "project": "Project Alpha",
-    "notes": "Working on user authentication module"
+    "name": "New Employee",
+    "email": "newemployee@example.com",
+    "password": "password123",
+    "role": "EMPLOYEE",
+    "managerId": 2
   }'
 ```
-
-#### Get My Timesheets
-```bash
-curl -X GET http://localhost:8081/api/timesheets \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-```
-
-#### Get Specific Timesheet
-```bash
-curl -X GET http://localhost:8081/api/timesheets/1 \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-```
-
-#### Update Timesheet
-```bash
-curl -X PUT http://localhost:8081/api/timesheets/1 \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d '{
-    "date": "2025-10-01",
-    "hours": 7,
-    "project": "Project Alpha",
-    "notes": "Updated hours after review"
-  }'
-```
-
-#### Delete Timesheet
-```bash
-curl -X DELETE http://localhost:8081/api/timesheets/1 \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-```
-
-### Manager Endpoints
 
 #### Get All Users
 ```bash
-curl -X GET http://localhost:8081/api/manager/users \
-  -H "Authorization: Bearer MANAGER_JWT_TOKEN"
+curl -X GET http://localhost:8081/api/admin/users \
+  -H "Authorization: Bearer ADMIN_JWT_TOKEN"
 ```
 
-#### Get All Timesheets
+#### Update User
+```bash
+curl -X PUT http://localhost:8081/api/admin/users/1 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ADMIN_JWT_TOKEN" \
+  -d '{
+    "name": "Updated Name",
+    "email": "updated@example.com",
+    "role": "MANAGER"
+  }'
+```
+
+#### Delete User
+```bash
+curl -X DELETE http://localhost:8081/api/admin/users/1 \
+  -H "Authorization: Bearer ADMIN_JWT_TOKEN"
+```
+
+### HR Endpoints (HR Role Required)
+
+#### Create Project
+```bash
+curl -X POST http://localhost:8081/api/hr/projects \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer HR_JWT_TOKEN" \
+  -d '{
+    "name": "Project Alpha",
+    "description": "Main development project",
+    "code": "PROJ001",
+    "client": "ABC Corporation",
+    "projectManagerId": 3
+  }'
+```
+
+#### Get All Projects
+```bash
+curl -X GET http://localhost:8081/api/hr/projects \
+  -H "Authorization: Bearer HR_JWT_TOKEN"
+```
+
+#### Assign Employee to Project
+```bash
+curl -X POST http://localhost:8081/api/hr/assignments \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer HR_JWT_TOKEN" \
+  -d '{
+    "employeeId": 4,
+    "projectId": 1,
+    "notes": "Frontend development lead"
+  }'
+```
+
+#### View Project Assignments
+```bash
+curl -X GET http://localhost:8081/api/hr/assignments/project/1 \
+  -H "Authorization: Bearer HR_JWT_TOKEN"
+```
+
+#### View Employee Assignments
+```bash
+curl -X GET http://localhost:8081/api/hr/assignments/employee/4 \
+  -H "Authorization: Bearer HR_JWT_TOKEN"
+```
+
+#### View All Timesheets
+```bash
+curl -X GET http://localhost:8081/api/hr/timesheets \
+  -H "Authorization: Bearer HR_JWT_TOKEN"
+```
+
+#### Get All Employees
+```bash
+curl -X GET http://localhost:8081/api/hr/employees \
+  -H "Authorization: Bearer HR_JWT_TOKEN"
+```
+
+#### Get All Managers
+```bash
+curl -X GET http://localhost:8081/api/hr/managers \
+  -H "Authorization: Bearer HR_JWT_TOKEN"
+```
+
+### Manager Endpoints (MANAGER Role Required)
+
+#### View Managed Employee Timesheets
 ```bash
 curl -X GET http://localhost:8081/api/manager/timesheets \
-  -H "Authorization: Bearer MANAGER_JWT_TOKEN"
-```
-
-#### Get Pending Timesheets
-```bash
-curl -X GET http://localhost:8081/api/manager/timesheets/pending \
-  -H "Authorization: Bearer MANAGER_JWT_TOKEN"
-```
-
-#### Get Timesheets by Status
-```bash
-curl -X GET http://localhost:8081/api/manager/timesheets/status/APPROVED \
   -H "Authorization: Bearer MANAGER_JWT_TOKEN"
 ```
 
@@ -196,11 +274,46 @@ curl -X PUT http://localhost:8081/api/manager/timesheets/1/reject \
   -H "Authorization: Bearer MANAGER_JWT_TOKEN"
 ```
 
+#### View Managed Employees
+```bash
+curl -X GET http://localhost:8081/api/manager/employees \
+  -H "Authorization: Bearer MANAGER_JWT_TOKEN"
+```
+
+### Employee Endpoints (EMPLOYEE Role Required)
+
+#### Submit Timesheet
+```bash
+curl -X POST http://localhost:8081/api/timesheets/submit \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer EMPLOYEE_JWT_TOKEN" \
+  -d '{
+    "projectId": 1,
+    "date": "2025-10-01",
+    "hours": 8.0,
+    "notes": "Working on authentication module"
+  }'
+```
+
+#### View My Timesheets
+```bash
+curl -X GET http://localhost:8081/api/timesheets \
+  -H "Authorization: Bearer EMPLOYEE_JWT_TOKEN"
+```
+
+#### View Assigned Projects
+```bash
+curl -X GET http://localhost:8081/api/timesheets/projects \
+  -H "Authorization: Bearer EMPLOYEE_JWT_TOKEN"
+```
+
 ## 🔒 Security & Authorization
 
-### Roles
-- **EMPLOYEE**: Can manage own timesheets
-- **MANAGER**: Can view all users, timesheets, and approve/reject timesheets
+### 4-Role Access Control System
+- **ADMIN**: Complete system administration, user management
+- **HR**: Project creation, employee assignments, view all timesheets
+- **MANAGER**: Approve/reject timesheets from managed employees
+- **EMPLOYEE**: Submit timesheets for assigned projects only
 
 ### JWT Token Usage
 1. Login to get JWT token
@@ -208,8 +321,11 @@ curl -X PUT http://localhost:8081/api/manager/timesheets/1/reject \
 3. Token expires in 24 hours (configurable)
 
 ### Protected Endpoints
-- All `/api/timesheets/*` - Requires authentication
-- All `/api/manager/*` - Requires MANAGER role
+- **Admin Only**: `/api/admin/*`
+- **HR Only**: `/api/hr/*`
+- **Manager Only**: `/api/manager/*`
+- **Employee/Manager**: `/api/timesheets/*`
+- **All Authenticated**: `/api/auth/profile`
 
 ## 📊 Response Format
 
@@ -221,7 +337,8 @@ All API responses follow a standardized format:
   "message": "Description of the operation",
   "data": {
     // Response data object
-  }
+  },
+  "error": "Error details (if applicable)"
 }
 ```
 
@@ -230,42 +347,47 @@ All API responses follow a standardized format:
 {
   "success": false,
   "message": "Validation failed",
-  "data": {
-    "email": "Please provide a valid email address",
-    "password": "Password must be at least 6 characters"
-  }
+  "data": null,
+  "error": "Email already exists in system"
 }
 ```
 
 ## 🏢 Business Rules
 
-### Timesheet Status Flow
-1. **PENDING** → Created by employee (default status)
-2. **APPROVED** → Approved by manager
-3. **REJECTED** → Rejected by manager
+### Timesheet Workflow
+1. **HR** creates projects and assigns employees
+2. **EMPLOYEE** submits timesheets for assigned projects (status: PENDING)
+3. **MANAGER** approves or rejects timesheets
+4. **Final States**: APPROVED or REJECTED
 
-### Current Status Change Rules
-- Managers can change status from any state to any other state
-- Employees can only create and update PENDING timesheets
-- Once approved/rejected, only managers can modify
+### Employee-Project Assignment Rules
+- Employees can only submit timesheets for assigned projects
+- HR manages all project assignments
+- Managers can only approve timesheets from their managed employees
+
+### User Hierarchy Rules
+- Employees report to managers
+- Managers can have multiple employees
+- HR and Admin have organization-wide access
+- Users can only be assigned one manager
 
 ### Validation Rules
-- **Hours**: 1-24 hours per day
+- **Hours**: 0.5-24 hours per timesheet entry
 - **Date**: Cannot be in the future
-- **Project**: 2-255 characters, alphanumeric with spaces, hyphens, underscores, dots
-- **Role**: Must be either EMPLOYEE or MANAGER
-- **Email**: Must be valid email format
-- **Password**: Minimum 6 characters
+- **Project Assignment**: Must exist before timesheet submission
+- **Role Hierarchy**: Enforced through Spring Security
+- **Email**: Must be unique across system
+- **Password**: Minimum 6 characters with complexity requirements
 
 ## 🛠️ Development Commands
 
 ### Build Commands
 ```bash
 # Clean build
-java -cp ".mvn\wrapper\maven-wrapper.jar" "-Dmaven.multiModuleProjectDirectory=D:\website" org.apache.maven.wrapper.MavenWrapperMain clean package -DskipTests
+.\mvnw.cmd clean package -DskipTests
 
 # Run with Maven
-java -cp ".mvn\wrapper\maven-wrapper.jar" "-Dmaven.multiModuleProjectDirectory=D:\website" org.apache.maven.wrapper.MavenWrapperMain spring-boot:run
+.\mvnw.cmd spring-boot:run
 
 # Run JAR directly
 java -jar target/hr-website-0.0.1-SNAPSHOT.jar
@@ -291,10 +413,28 @@ hr-website/
 │   ├── aspect/              # AOP logging aspects
 │   ├── config/              # Configuration classes
 │   ├── controller/          # REST API controllers
+│   │   ├── AdminController.java       # Admin operations
+│   │   ├── HRController.java          # HR operations
+│   │   ├── ManagerController.java     # Manager operations
+│   │   ├── TimesheetController.java   # Employee timesheets
+│   │   └── AuthController.java        # Authentication
 │   ├── dto/                 # Data Transfer Objects
+│   │   ├── ApiResponse.java
+│   │   ├── UserResponse.java
+│   │   ├── ProjectResponse.java
+│   │   ├── TimesheetResponse.java
+│   │   └── AssignmentResponse.java
 │   ├── exception/           # Exception handling
 │   ├── model/               # JPA entities
-│   ├── repository/          # Data access layer
+│   │   ├── User.java
+│   │   ├── Project.java
+│   │   ├── Timesheet.java
+│   │   └── EmployeeProjectAssignment.java
+│   ├── repository/          # Data access layer with JOIN FETCH
+│   │   ├── UserRepository.java
+│   │   ├── ProjectRepository.java
+│   │   ├── TimesheetRepository.java
+│   │   └── EmployeeProjectAssignmentRepository.java
 │   ├── security/            # JWT security implementation
 │   ├── service/             # Business logic layer
 │   ├── validation/          # Custom validators
@@ -318,6 +458,7 @@ spring.datasource.url=jdbc:postgresql://localhost:5432/hrdb
 spring.datasource.username=hruser
 spring.datasource.password=hrpassword123
 server.port=8081
+spring.jpa.hibernate.ddl-auto=update
 ```
 
 ### JWT Configuration
@@ -339,15 +480,33 @@ app.jwt.expiration-ms=86400000
 
 ## 🧪 Testing
 
-### Manual Testing with Postman
-1. Import the curl commands as Postman collection
-2. Set up environment variables for base URL and tokens
-3. Test authentication flow
-4. Test employee timesheet operations
-5. Test manager approval workflow
+### Complete Workflow Testing
+1. **Admin Setup**: Create HR, Manager, and Employee users
+2. **HR Operations**: Create projects and assign employees
+3. **Employee Actions**: Submit timesheets for assigned projects
+4. **Manager Approval**: Review and approve/reject timesheets
+5. **System Verification**: Check all role-based access controls
 
-### Test Data
-The application starts with an empty database. Create test users using the registration endpoint.
+### Test Sequence
+```bash
+# 1. Create Admin user
+curl -X POST http://localhost:8081/api/auth/register -H "Content-Type: application/json" -d '{"name": "Admin", "email": "admin@example.com", "password": "password123", "role": "ADMIN"}'
+
+# 2. Admin creates HR user
+curl -X POST http://localhost:8081/api/admin/users -H "Authorization: Bearer ADMIN_TOKEN" -H "Content-Type: application/json" -d '{"name": "HR Manager", "email": "hr@example.com", "password": "password123", "role": "HR"}'
+
+# 3. HR creates project
+curl -X POST http://localhost:8081/api/hr/projects -H "Authorization: Bearer HR_TOKEN" -H "Content-Type: application/json" -d '{"name": "Test Project", "description": "Testing", "code": "TEST001", "client": "Test Client"}'
+
+# 4. HR assigns employee to project
+curl -X POST http://localhost:8081/api/hr/assignments -H "Authorization: Bearer HR_TOKEN" -H "Content-Type: application/json" -d '{"employeeId": 4, "projectId": 1, "notes": "Test assignment"}'
+
+# 5. Employee submits timesheet
+curl -X POST http://localhost:8081/api/timesheets/submit -H "Authorization: Bearer EMPLOYEE_TOKEN" -H "Content-Type: application/json" -d '{"projectId": 1, "hours": 8.0, "date": "2025-01-15", "notes": "Development work"}'
+
+# 6. Manager approves timesheet
+curl -X PUT http://localhost:8081/api/manager/timesheets/1/approve -H "Authorization: Bearer MANAGER_TOKEN"
+```
 
 ## 🚨 Troubleshooting
 
@@ -392,6 +551,32 @@ curl http://localhost:8081/actuator/metrics/jdbc.connections.active
 - Slow operations (>1000ms) are logged as warnings
 - Database connection pool monitoring via HikariCP
 
+## 🎯 Features Implemented
+
+### ✅ Core Features
+- [x] **4-Role Access Control**: ADMIN, HR, MANAGER, EMPLOYEE
+- [x] **JWT Authentication**: Secure token-based authentication
+- [x] **Project Management**: HR can create and manage projects
+- [x] **Employee Assignment**: HR assigns employees to projects
+- [x] **Timesheet Submission**: Employees submit for assigned projects only
+- [x] **Manager Approval**: Managers approve/reject timesheets from managed employees
+- [x] **Lazy Loading Optimization**: Enhanced JOIN FETCH queries prevent N+1 problems
+- [x] **Role-based Authorization**: Spring Security method-level security
+- [x] **Global Exception Handling**: Standardized error responses
+- [x] **Audit Logging**: AOP-based operation logging
+- [x] **Data Validation**: Comprehensive input validation
+- [x] **Circular Reference Prevention**: Safe entity relationships
+
+### ✅ Technical Features
+- [x] **Database Relationships**: Complex JPA entity relationships
+- [x] **Transaction Management**: @Transactional service methods
+- [x] **Repository Pattern**: Clean separation of data access
+- [x] **DTO Pattern**: Secure data transfer objects
+- [x] **Builder Pattern**: Fluent API response builders
+- [x] **Configuration Management**: Externalized configuration
+- [x] **Health Monitoring**: Spring Boot Actuator endpoints
+- [x] **Production Logging**: Structured logging with rotation
+
 ## 🎯 Future Enhancements
 
 ### Planned Features
@@ -403,16 +588,25 @@ curl http://localhost:8081/actuator/metrics/jdbc.connections.active
 - [ ] Mobile application support
 - [ ] Advanced search and filtering
 - [ ] Audit trail for all operations
+- [ ] File attachment support for timesheets
+- [ ] Calendar integration
+- [ ] Time tracking with start/stop functionality
+- [ ] Overtime calculations
+- [ ] Department-based project filtering
 
 ### Technical Improvements
-- [ ] Unit and integration tests
+- [ ] Unit and integration tests (JUnit 5 + TestContainers)
 - [ ] Docker containerization
-- [ ] CI/CD pipeline setup
+- [ ] CI/CD pipeline setup (GitHub Actions)
 - [ ] API versioning
 - [ ] Rate limiting
-- [ ] Caching implementation
+- [ ] Redis caching implementation
 - [ ] Database migrations with Flyway
 - [ ] OpenAPI/Swagger documentation
+- [ ] Performance monitoring
+- [ ] Security enhancements (CSRF, XSS protection)
+- [ ] Microservices architecture migration
+- [ ] Event-driven architecture with Spring Cloud Stream
 
 ---
 
@@ -426,3 +620,13 @@ For technical issues or questions about the HR Website system, please refer to:
 ## 📄 License
 
 This project is part of an enterprise HR management system. All rights reserved.
+
+---
+
+## 🎉 System Status
+
+✅ **Production Ready**: Complete 4-role HR workflow system
+🔐 **Secure**: JWT authentication with role-based authorization  
+⚡ **Optimized**: Lazy loading issues resolved with JOIN FETCH
+🏗️ **Enterprise Architecture**: Layered design with separation of concerns
+📊 **Comprehensive**: Admin → HR → Manager → Employee workflow complete

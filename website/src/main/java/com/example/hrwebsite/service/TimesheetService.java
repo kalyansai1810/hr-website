@@ -26,7 +26,7 @@ public class TimesheetService {
      * @return List of all timesheets
      */
     public List<Timesheet> getAllTimesheets() {
-        return timesheetRepository.findAll();
+        return timesheetRepository.findAllWithRelations();
     }
     
     /**
@@ -35,7 +35,7 @@ public class TimesheetService {
      * @return List of user's timesheets
      */
     public List<Timesheet> getTimesheetsByUser(User user) {
-        return timesheetRepository.findByUser(user);
+        return timesheetRepository.findByUserIdWithRelations(user.getId());
     }
     
     /**
@@ -44,7 +44,7 @@ public class TimesheetService {
      * @return Timesheet if found
      */
     public Optional<Timesheet> getTimesheetById(Long id) {
-        return timesheetRepository.findById(id);
+        return timesheetRepository.findByIdWithRelations(id);
     }
     
     /**
@@ -78,7 +78,7 @@ public class TimesheetService {
      * @return Updated timesheet
      */
     public Timesheet updateTimesheet(Long id, Timesheet updatedTimesheet, String userEmail) {
-        Timesheet existingTimesheet = timesheetRepository.findById(id)
+        Timesheet existingTimesheet = timesheetRepository.findByIdWithRelations(id)
             .orElseThrow(() -> new RuntimeException("Timesheet not found with id: " + id));
         
         User user = userService.findByEmail(userEmail);
@@ -103,7 +103,7 @@ public class TimesheetService {
      * @return Updated timesheet
      */
     public Timesheet approveTimesheet(Long id) {
-        Timesheet timesheet = timesheetRepository.findById(id)
+        Timesheet timesheet = timesheetRepository.findByIdWithRelations(id)
             .orElseThrow(() -> new RuntimeException("Timesheet not found with id: " + id));
         
         timesheet.setStatus("APPROVED");
@@ -116,7 +116,7 @@ public class TimesheetService {
      * @return Updated timesheet
      */
     public Timesheet rejectTimesheet(Long id) {
-        Timesheet timesheet = timesheetRepository.findById(id)
+        Timesheet timesheet = timesheetRepository.findByIdWithRelations(id)
             .orElseThrow(() -> new RuntimeException("Timesheet not found with id: " + id));
         
         timesheet.setStatus("REJECTED");
@@ -129,7 +129,7 @@ public class TimesheetService {
      * @param userEmail Email of user deleting the timesheet
      */
     public void deleteTimesheet(Long id, String userEmail) {
-        Timesheet timesheet = timesheetRepository.findById(id)
+        Timesheet timesheet = timesheetRepository.findByIdWithRelations(id)
             .orElseThrow(() -> new RuntimeException("Timesheet not found with id: " + id));
         
         User user = userService.findByEmail(userEmail);

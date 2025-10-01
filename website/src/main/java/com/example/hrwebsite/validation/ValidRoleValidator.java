@@ -8,7 +8,7 @@ import jakarta.validation.ConstraintValidatorContext;
  */
 public class ValidRoleValidator implements ConstraintValidator<ValidRole, String> {
     
-    private static final String[] VALID_ROLES = {"EMPLOYEE", "MANAGER"};
+    private static final String[] VALID_ROLES = {"ADMIN", "HR", "MANAGER", "EMPLOYEE"};
     
     @Override
     public void initialize(ValidRole constraintAnnotation) {

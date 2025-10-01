@@ -2,13 +2,19 @@ package com.example.hrwebsite.dto;
 
 import jakarta.validation.constraints.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 /**
  * DTO for timesheet creation and update requests
  */
+@Data
 public class TimesheetRequest {
+    
+    @NotNull(message = "Project ID is required")
+    private Long projectId;
     
     @NotNull(message = "Date is required")
     @PastOrPresent(message = "Date cannot be in the future")
@@ -16,68 +22,19 @@ public class TimesheetRequest {
     private LocalDate date;
     
     @NotNull(message = "Hours worked is required")
-    @Min(value = 1, message = "Hours worked must be at least 1")
-    @Max(value = 24, message = "Hours worked cannot exceed 24 per day")
-    private Integer hours;
+    @DecimalMin(value = "0.5", message = "Hours worked must be at least 0.5")
+    @DecimalMax(value = "24.0", message = "Hours worked cannot exceed 24 per day")
+    private Double hours;
     
-    @NotBlank(message = "Project name is required")
-    @Size(min = 2, max = 255, message = "Project name must be between 2 and 255 characters")
-    @Pattern(regexp = "^[a-zA-Z0-9\\s\\-_\\.]+$", message = "Project name contains invalid characters")
-    private String project;
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime startTime;
     
-    @Size(max = 1000, message = "Notes must not exceed 1000 characters")
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime endTime;
+    
+    @Size(max = 1000, message = "Description must not exceed 1000 characters")
+    private String description;
+    
+    @Size(max = 500, message = "Notes must not exceed 500 characters")
     private String notes;
-    
-    // Constructors
-    public TimesheetRequest() {}
-    
-    public TimesheetRequest(LocalDate date, Integer hours, String project, String notes) {
-        this.date = date;
-        this.hours = hours;
-        this.project = project;
-        this.notes = notes;
-    }
-    
-    // Getters and Setters
-    public LocalDate getDate() {
-        return date;
-    }
-    
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-    
-    public Integer getHours() {
-        return hours;
-    }
-    
-    public void setHours(Integer hours) {
-        this.hours = hours;
-    }
-    
-    public String getProject() {
-        return project;
-    }
-    
-    public void setProject(String project) {
-        this.project = project;
-    }
-    
-    public String getNotes() {
-        return notes;
-    }
-    
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
-    
-    @Override
-    public String toString() {
-        return "TimesheetRequest{" +
-                "date=" + date +
-                ", hours=" + hours +
-                ", project='" + project + '\'' +
-                ", notes='" + notes + '\'' +
-                '}';
-    }
 }

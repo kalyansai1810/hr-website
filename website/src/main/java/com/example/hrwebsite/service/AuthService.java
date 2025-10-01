@@ -48,8 +48,8 @@ public class AuthService {
             user.setRole("EMPLOYEE");
         }
         
-        // Create user
-        User createdUser = userService.createUser(user);
+        // Create user (using null for createdById since this is self-registration)
+        User createdUser = userService.createUser(user, null);
         
         Map<String, Object> response = new HashMap<>();
         response.put("message", "User registered successfully");
