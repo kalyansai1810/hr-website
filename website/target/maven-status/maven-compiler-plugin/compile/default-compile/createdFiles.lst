@@ -1,0 +1,15 @@
+com\example\hrwebsite\repository\TimesheetRepository.class
+com\example\hrwebsite\controller\AuthController.class
+com\example\hrwebsite\security\JwtTokenProvider.class
+com\example\hrwebsite\controller\ManagerController.class
+com\example\hrwebsite\exception\GlobalExceptionHandler.class
+com\example\hrwebsite\security\JwtAuthenticationFilter.class
+com\example\hrwebsite\model\User.class
+com\example\hrwebsite\DataInitializer.class
+com\example\hrwebsite\HrWebsiteApplication.class
+com\example\hrwebsite\model\Timesheet.class
+com\example\hrwebsite\security\SecurityConfig.class
+com\example\hrwebsite\security\CustomUserDetailsService.class
+com\example\hrwebsite\controller\UserRegistrationRequest.class
+com\example\hrwebsite\repository\UserRepository.class
+com\example\hrwebsite\controller\TimesheetController.class
