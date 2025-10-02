@@ -242,6 +242,24 @@ curl -X GET http://localhost:8081/api/hr/timesheets \
   -H "Authorization: Bearer HR_JWT_TOKEN"
 ```
 
+## ✅ Recent UI changes
+
+- Weekly grouped timesheet view: timesheets are now grouped by week (Monday–Sunday) and display per-day status badges and a weekly overall status (APPROVED / REJECTED / PENDING). This view is read-only in the `TimesheetManagement` page so HR and employees can review historical weeks without performing approve/reject actions there.
+- Manager approval workflow: managers should use the `TimesheetApproval` page to review pending weekly timesheets grouped by employee/project/week. Managers can approve or reject individual days within a week and provide rejection reasons when applicable.
+
+## 🧭 Frontend (React) - Local development
+
+To run the frontend locally (development mode with hot-reload):
+
+```powershell
+cd D:\website\frontend
+$env:PORT=3000
+npm start
+```
+
+Open http://localhost:3000 and log in with a demo account (see demo credentials in the frontend README). If you are logged in as HR open the "All Timesheets" (Manage) page to see the weekly grouped read-only view. Managers should use the "Timesheet Approval" page to act on pending timesheets.
+
+
 #### Get All Employees
 ```bash
 curl -X GET http://localhost:8081/api/hr/employees \

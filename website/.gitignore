@@ -90,3 +90,16 @@ snippets/
 structs/
 sys/
 workbench/
+
+# Frontend
+/frontend/node_modules/
+/frontend/build/
+/frontend/dist/
+/frontend/.env
+
+# Ignore npm/yarn lock on frontend if you prefer
+/frontend/package-lock.json
+/frontend/yarn.lock
+
+# Ignore compiled or generated frontend artifacts
+/frontend/.cache/
